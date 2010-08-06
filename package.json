@@ -1,0 +1,13 @@
+{
+    "name": "jsloader",
+    "author": {
+        "name": "Victor Farazdagi",
+        "email": "simple.square@gmail.com",
+        "url": "http://www.phpmag.ru/"
+    },
+    "url": "https://github.com/farazdagi/jsloader",
+    "description": "Extremely light-weight unobtrusive script loader.",
+    "keywords": [ "loader", "tools", "nonblocking" ],
+    "lib": "foursee"
+}
+
