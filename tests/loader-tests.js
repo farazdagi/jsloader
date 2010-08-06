@@ -1,11 +1,15 @@
-$(document).ready(function(){
-        module("Basic Unit Test");
+$(document).ready(function () {
+    module("Sample Unit Test");
 
-        test("Sample test", function()
-            {
-            expect(1);
-            equals(divide(4,2),
-                2,
-                'Expected 2 as the result, result was: ' + divide(4,2));
-            });
-        });
+    test("Sample", function () {
+        expect(1);
+        ok(true, "Sample Test Passing..");
+    });
+
+    module("Get Loader");
+
+    test("Get JSLoader", function () {
+
+    });
+
+});
