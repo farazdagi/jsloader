@@ -25,7 +25,7 @@ $(document).ready(function () {
 
     module("Get Loader");
 
-    test("Test getUserAgent", 11, function () {
+    test("Test getUserAgent", 25, function () {
         var ua;
 
         // Firefox
@@ -81,39 +81,34 @@ $(document).ready(function () {
         ua = JSLoader.getUA("Mozilla/4.0 (compatible; MSIE 5.0; Windows NT 5.2; .NET CLR 1.1.4322)", true);
         equals(ua.ie, 5, "IE 5.0");
 
-        // Chrome
         // Safari
         ua = JSLoader.getUA("Mozilla/5.0 (Windows; U; Windows NT 6.1; ja-JP) AppleWebKit/5", true);
-        equals(ua.webkit, 9, "Safari 5.0 on wins");
+        equals(ua.webkit, 5, "Safari 5.0 on wins");
 
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
+        ua = JSLoader.getUA("Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_4_11; de-de) AppleWebKit/533.16 (KHTML, like Gecko) Version/4.1 Safari/533.16", true);
+        equals(ua.webkit, 533.16, "Safari 4.1 Mac");
 
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
+        ua = JSLoader.getUA("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/533.4+ (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7", true);
+        equals(ua.webkit, 533.4, "Safari 4.0.5 on Mac");
 
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
+        ua = JSLoader.getUA("Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16", true);
+        equals(ua.webkit, 528.16, "Safari 4.0 on Windows");
 
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
+        ua = JSLoader.getUA("Mozilla/5.0 (Windows; U; Windows NT 5.2; de-DE) AppleWebKit/528+ (KHTML, like Gecko) Version/3.2.1 Safari/525.27.1", true);
+        equals(ua.webkit, 528, "Safari 3.2.1 on Windows");
 
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
+        ua = JSLoader.getUA("Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_2; en-us) AppleWebKit/525.9 (KHTML, like Gecko) Version/3.1 Safari/525.9", true);
+        equals(ua.webkit, 525.9, "Safari 3.1 on Mac");
 
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
+        ua = JSLoader.getUA("Mozilla/5.0 (Linux; U; Ubuntu; en-us) AppleWebKit/525.13 (KHTML, like Gecko) Version/2.2 Firefox/525.13", true);
+        equals(ua.webkit, 525.13, "Safari 2.2 on Linux");
 
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
-
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
-
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 9, "");
+        ua = JSLoader.getUA("Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/312.8 (KHTML, like Gecko) Safari/312.5", true);
+        equals(ua.webkit, 312.8, "Safari 1.3.2 on Mac");
 
         // Opera
+        ua = JSLoader.getUA("", true);
+        equals(ua.webkit, 5, "");
 
 
     });
