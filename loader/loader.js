@@ -35,9 +35,9 @@ var JSLoader = JSLoader || (function () {
      *
      * @link http://yui.yahooapis.com/combo?3.0.0/build/yui/yui.js
      */
-    function _detectUA(userAgent) {
+    function _detectUA(userAgent, forceReload) {
         // no need to obtain user agent yet again
-        if (ua !== null) {
+        if (forceReload !== true && ua !== null) {
             return ua;
         }
 
@@ -49,7 +49,7 @@ var JSLoader = JSLoader || (function () {
                 opera: 0,
                 gecko: 0,
                 webkit: 0,
-                modile: null,
+                mobile: null,
                 air: 0,
                 caja: nav.cajaVersion,
                 ssl: false
@@ -130,9 +130,11 @@ var JSLoader = JSLoader || (function () {
          * @param Array|Object  args        Argument(s) to be passed to callback
          * @param Object|null   scope       Callback will be triggered in context of given scope
          */
-        load: function (uris, callback, args, scope) {
-            _load(uris, callback, args, scope);
-        }, 
+        load: _load,
+
+        /**
+         * Obtain user agent browser
+         */
         getUA: _detectUA
     };
 }) ();
