@@ -6,16 +6,16 @@ $(document).ready(function () {
     };
 
     var callback1 = function(arg1, arg2) {
-        ok(arg1 === 1, "Argument 1 is passed ok");
-        ok(arg2 === 2, "Argument 2 is passed ok");
-        ok(this.the_ultimate_answer === 42, "Container object is accessible via this");
+        equals(arg1, 1, "Test first argument");
+        equals(arg2, 2, "Test second argument");
+        equals(this.the_ultimate_answer, 42, "Container object is accessible via this");
     },
 
     passMe = {x: 1, y: 2},
 
-    callback2 = function(theonlyarg) {
-        alert('x');
-        ok(theonlyarg === passMe, theonlyarg + " = " + passMe);
+    callback2 = function(theOnlyArg) {
+        same(theOnlyArg, passMe, "The only passed argument test for identity");
+        equals(theOnlyArg.x, 1, "Test object parameters");
     },
 
     // object used as scope (to be passed into Function.call|apply)
@@ -25,15 +25,57 @@ $(document).ready(function () {
 
     module("Get Loader");
 
-    test("JSLoader.loader.load() - argument passing", function () {
-        expect(3);
-        
+    test("Test getUserAgent", 11, function () {
+        var ua;
+
+        // Firefox
+        ua = JSLoader.getUA("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.19) Gecko/20081202 Firefox (Debian-2.0.0.19-0etch1)");
+        equals(ua.gecko, 1.8, "Firefox 2.0 on Debian");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (Windows; U; Windows NT 6.1; ru; rv:1.9.2.3) Gecko/20100401 Firefox/4.0 (.NET CLR 3.5.30729)");
+        equals(ua.gecko, 1.8, "Firefox 2.0 on Windows");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (X11; U; Linux i686; pl-PL; rv:1.9.0.2) Gecko/2008092313 Ubuntu/9.25 (jaunty) Firefox/3.8");
+        equals(ua.gecko, 1.8, "Firefox 3.8 on Ubuntu Jaunty");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.2a1pre) Gecko/20090428 Firefox/3.6a1pre");
+        equals(ua.gecko, 1.8, "Firefox 3.6a1pre on Linux");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.2) Gecko/20100128 Gentoo Firefox/3.6");
+        equals(ua.gecko, 1.8, "Firefox 3.6 on Gentoo");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (Windows; U; Windows NT 6.1; hu; rv:1.9.1.9) Gecko/20100315 Firefox/3.5.9 (.NET CLR 3.5.30729)");
+        equals(ua.gecko, 1.8, "Firefox 3.5.9 on Windows NT");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.1) Gecko/20090718 Firefox/3.5.1");
+        equals(ua.gecko, 1.8, "Firefox 3.5.1 on Windows NT");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (X11; U; FreeBSD i386; en-US; rv:1.9.1) Gecko/20090703 Firefox/3.5");
+        equals(ua.gecko, 1.8, "Firefox 3.5 on FreeBSD");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (X11; U; Linux x86_64; de; rv:1.9.0.3) Gecko/2008090713 Firefox/3.0.3");
+        equals(ua.gecko, 1.8, "Firefox 3.0.3 on Linux");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (Windows; U; Windows NT 6.0; de; rv:1.9.0.15) Gecko/2009101601 Firefox 2.1 (.NET CLR 3.5.30729)");
+        equals(ua.gecko, 1.8, "Firefox 2.1 on  Windows NT");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.10) Gecko/20050920 Firefox/1.0.6");
+        equals(ua.gecko, 1.8, "Firefox 1.0.6 on Linux");
+
+        // Chrome
+        // Safari
+        // Opera
+
+
+        console.log(ua);
+    });
+
+    test("JSLoader.load() - full argument list", 3, function () {
         // full arguments test
         JSLoader.load('http://test.qubr.ru/jsloader/tests/js.php?id=1', callback1, [1, 2], scope);
     });
 
-    test("JSLoader.loader.load() - pass array of URIs", function () {
-        expect(3);
+    test("JSLoader.loader.load() - pass array of URIs", 3, function () {
 
         var uris = [
             'http://test.qubr.ru/jsloader/tests/js.php?id=1',
@@ -45,9 +87,7 @@ $(document).ready(function () {
         JSLoader.load(uris, callback1, [1, 2], scope);
     });
 
-    test("JSLoader.load() - single object passed", function () {
-            alert('x');
-        expect(1);
+    test("JSLoader.load() - single object passed", 2, function () {
         JSLoader.load(
             'http://test.qubr.ru/jsloader/tests/js.php?id=1',
             callback2, passMe
