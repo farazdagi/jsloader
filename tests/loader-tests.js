@@ -25,7 +25,7 @@ $(document).ready(function () {
 
     module("Get Loader");
 
-    test("Test getUserAgent", 25, function () {
+    test("Test getUserAgent", 35, function () {
         var ua;
 
         // Firefox
@@ -107,9 +107,35 @@ $(document).ready(function () {
         equals(ua.webkit, 312.8, "Safari 1.3.2 on Mac");
 
         // Opera
-        ua = JSLoader.getUA("", true);
-        equals(ua.webkit, 5, "");
+        ua = JSLoader.getUA("Opera/9.99 (Windows NT 5.1; U; pl) Presto/9.9.9", true);
+        equals(ua.opera, 9.99, "Opera 9.99 on Windows");
 
+        ua = JSLoader.getUA("Opera/9.70 (Linux i686 ; U; ; en) Presto/2.2.1", true);
+        equals(ua.opera, 9.7, "Opera 9.70 on Linux");
+
+        ua = JSLoader.getUA("Opera/9.26 (Windows NT 5.1; U; MEGAUPLOAD 2.0; en)", true);
+        equals(ua.opera, 9.26, "Opera 9.26 on Wins");
+
+        ua = JSLoader.getUA("Opera/8.51 (Macintosh; PPC Mac OS X; U; de)", true);
+        equals(ua.opera, 8.51, "Opera 8.51 on Mac");
+
+        ua = JSLoader.getUA("Opera/7.22 (Windows NT 5.1; U) [de]", true);
+        equals(ua.opera, 7.22, "Opera 7.22 on Wins");
+
+        ua = JSLoader.getUA("Mozilla/4.0 (compatible; MSIE 5.0; Windows XP) Opera 6.06 [fr]", true);
+        equals(ua.opera, 6.06, "Opera 6.06 on Wins");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (Windows 2000; U) Opera 6.03 [en]", true);
+        equals(ua.opera, 6.03, "Opera 6.03 on Wins");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (Windows 98; U) Opera 5.12 [de]", true);
+        equals(ua.opera, 5.12, "Opera 5.12 on Wins");
+
+        ua = JSLoader.getUA("Mozilla/5.0 (SunOS 5.8 sun4u; U) Opera 5.0 [en]", true);
+        equals(ua.opera, 5, "Opera 5.0 on SunOS");
+
+        ua = JSLoader.getUA("Opera/9.80 (X11; Linux x86_64; U; it) Presto/2.2.15 Version/10.10", true);
+        equals(ua.opera, 9.8, "Opera 9.80 on Linux");
 
     });
 
