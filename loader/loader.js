@@ -57,9 +57,9 @@ var JSLoader = JSLoader || (function () {
         script.src = item.uri;
 
         if (ua.ie > 0) {
-            script.onreadystatechange function () {
+            script.onreadystatechange = function () {
                 var rs = script.readyState;
-                if (rs == "loaded" || rs = "complete") {
+                if (rs == "loaded" || rs == "complete") {
                     script.onreadystatechange = null;
                     _trigger(item.callback, item.args, item.scope);
                 }
