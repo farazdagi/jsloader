@@ -1,15 +1,87 @@
 var JSLoader = JSLoader || (function () {
 
-        // cached reference to document
     var d = document,
+        
+        // Processes queue - procs are executed sequentially (FIFO)
+        queue = [],
+
+        // currently processed queue item
+        item = null,
+
+        // current state of the loader
+        STATUS = {
+            PENDING: 2, // previous request being processed
+            READY: 4    // requests are ready to be processed
+        },
+        state = STATUS.READY,
+
+        // current context (callback, args, scope)
+        context = {
+            callback: null,
+            args: [],
+            scope: null
+        },
 
         // detected User Agent (see _detectUA())
         ua = null; 
 
+    function _queueUris(uris, callback, args, scope) {
+        if (uris) {
+            // convert string uri to array
+            uris = uris.constructor === Array ? uris : [uris];
+
+            for (i = 0, mx = uris.length; i < mx; i++) {
+                queue.push(function () {
+                    return function () {
+                        _process(uris[i]);
+                    };
+                }());
+            }
+        }
+    }
+
+    function _process() {
+        var i, mx, script;
+
+        // make sure that loader waits for previous requests to complete
+        // before new requests are processed (see finilize() where load 
+        // process is resumed). Stop when queue is empty
+        if (state === STATUS.PENDING || !(item = queue.shift()) ) {
+            return;
+        }
+
+        state = STATUS.PENDING;
+
+        script = d.createElement('script');
+        script.type = "text/javascript";
+        script.src = item.uri;
+
+        if (ua.ie > 0) {
+            script.onreadystatechange function () {
+                var rs = script.readyState;
+                if (rs == "loaded" || rs = "complete") {
+                    script.onreadystatechange = null;
+                    _trigger(item.callback, item.args, item.scope);
+                }
+            };
+        } else {
+            script.onload = function () {
+                _trigger(item.callback, item.args, item.scope);
+            };
+        }
+
+
+
+    }
+
     function _load(uris, callback, args, scope) {
+        var i, mx;
         _detectUA();
-        _detectUA();
-        _trigger(callback, args, scope);
+        _queueUris(uris, callback, args, scope);
+        _process();
+
+
+
     }
 
     /**
@@ -20,10 +92,16 @@ var JSLoader = JSLoader || (function () {
      * @param Object|null   scope       Callback will be triggered in context of given scope
      */
     function _trigger(callback, args, scope) {
-        if (args.constructor === Array) {
-            callback.apply(scope || null, args);
-        } else {
-            callback.call(scope || null, args);
+        if (callback) {
+            if ( !(args.constructor === Array) ) {
+                args = [args];
+            }
+            callback.apply(scope || window, args);
+            state =  STATUS.READY;
+        } 
+
+        if (queue.length) { // resume with the next item
+            _load();
         }
     }
 
@@ -42,7 +120,7 @@ var JSLoader = JSLoader || (function () {
         }
 
         var 
-            num = parseFloat,
+            toNum = parseFloat,
             nav = navigator,
             o = {
                 ie: 0,
@@ -70,7 +148,7 @@ var JSLoader = JSLoader || (function () {
             // Modern WebKit browsers are at least X-Grade
             m = nua.match(/AppleWebKit\/([^\s]*)/);
             if (m && m[1]) {
-                o.webkit = num(m[1]);
+                o.webkit = toNum(m[1]);
 
                 // Mobile browser check
                 if (/ Mobile\//.test(nua)) {
@@ -92,7 +170,7 @@ var JSLoader = JSLoader || (function () {
                 // @todo check Opera/8.01 (J2ME/MIDP; Opera Mini/2.0.4509/1316; fi; U; ssr)
                 m = nua.match(/Opera[\s\/]([^\s]*)/);
                 if (m && m[1]) {
-                    o.opera=num(m[1]);
+                    o.opera =toNum(m[1]);
                     m = nua.match(/Opera Mini[^;]*/);
                     if (m) {
                         o.mobile = m[0]; // ex: Opera Mini/2.0.4509/1316
@@ -100,14 +178,14 @@ var JSLoader = JSLoader || (function () {
                 } else { // not opera or webkit
                     m = nua.match(/MSIE\s([^;]*)/);
                     if (m && m[1]) {
-                        o.ie = num(m[1]);
+                        o.ie = toNum(m[1]);
                     } else { // not opera, webkit, or ie
                         m = nua.match(/Gecko\/([^\s]*)/);
                         if (m) {
                             o.gecko = 1; // Gecko detected, look for revision
                             m= nua.match(/rv:([^\s\)]*)/);
                             if (m && m[1]) {
-                                o.gecko = num(m[1]);
+                                o.gecko = toNum(m[1]);
                             }
                         }
                     }
