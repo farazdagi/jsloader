@@ -5,50 +5,67 @@ var JSLoader = JSLoader || (function () {
         // Processes queue - procs are executed sequentially (FIFO)
         queue = [],
 
-        // currently processed queue item
-        item = null,
-
         // current state of the loader
-        STATUS = {
-            PENDING: 2, // previous request being processed
-            READY: 4    // requests are ready to be processed
-        },
-        state = STATUS.READY,
+        STATUS = { PENDING: 2, READY: 4 },
 
-        // current context (callback, args, scope)
-        context = {
-            callback: null,
-            args: [],
-            scope: null
-        },
+        state = STATUS.READY,
 
         // detected User Agent (see _detectUA())
         ua = null; 
 
-    function _queueUris(uris, callback, args, scope) {
-        if (uris) {
-            // convert string uri to array
-            uris = uris.constructor === Array ? uris : [uris];
+    function load(urls, callback, args, scope) {
+        //_detectUA();
+        //_queueUris(uris, callback, args, scope);
+        //_process();
+        
+        registerUrls(urls);
+        registerCallback(callback, args, scope);
 
-            for (i = 0, mx = uris.length; i < mx; i++) {
+        dispatch();
+
+
+    }
+
+    function registerCallback(callback, params, scope) {
+        if (callback) {
+            queue.push(function () {
+                return function () { execute(callback, params, scope)};
+            }());
+        }
+    }
+
+    function registerUrls(urls) {
+        var i, mx;
+
+        if (urls) {
+            urls = urls.constructor === Array ? urls : [urls];
+            for (i = 0, mx = urls.length; i < mx; i++) {
                 queue.push(function () {
-                    return function () {
-                        _process(uris[i]);
-                    };
+                    return function () { loadScript(urls[i]); };
                 }());
             }
         }
     }
 
-    function _process() {
-        var i, mx, script;
-
-        // make sure that loader waits for previous requests to complete
-        // before new requests are processed (see finilize() where load 
-        // process is resumed). Stop when queue is empty
-        if (state === STATUS.PENDING || !(item = queue.shift()) ) {
+    function dispatch() {
+        var process;
+        if (state === STATUS.PENDING) { // previous request is processed
             return;
         }
+
+        if (process = queue.shift()) {
+            process();
+        } else {
+            state = STATUS.READY;
+        }
+    }
+
+    function loadScript(url) {
+        var i, mx, script;
+
+        console.log(url);
+        state = STATUS.READY;
+        return ;
 
         state = STATUS.PENDING;
 
@@ -74,15 +91,6 @@ var JSLoader = JSLoader || (function () {
 
     }
 
-    function _load(uris, callback, args, scope) {
-        var i, mx;
-        _detectUA();
-        _queueUris(uris, callback, args, scope);
-        _process();
-
-
-
-    }
 
     /**
      * Trigger the callback. Chose the method depending on arguments
@@ -91,7 +99,7 @@ var JSLoader = JSLoader || (function () {
      * @param Array|Object  args        Argument(s) to be passed to callback
      * @param Object|null   scope       Callback will be triggered in context of given scope
      */
-    function _trigger(callback, args, scope) {
+    function execute(callback, args, scope) {
         if (callback) {
             if ( !(args.constructor === Array) ) {
                 args = [args];
@@ -208,7 +216,7 @@ var JSLoader = JSLoader || (function () {
          * @param Array|Object  args        Argument(s) to be passed to callback
          * @param Object|null   scope       Callback will be triggered in context of given scope
          */
-        load: _load,
+        load: load,
 
         /**
          * Obtain user agent browser
