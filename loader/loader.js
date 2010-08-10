@@ -32,7 +32,7 @@ var JSLoader = JSLoader || (function () {
     }
 
     function loadScript(url) {
-        var i, mx, script;
+        var script;
 
         state = STATUS.PENDING;
         head = head || d.getElementsByTagName('head')[0];
