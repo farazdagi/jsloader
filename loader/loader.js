@@ -1,3 +1,4 @@
+/*jslint regexp: false, browser: true, plusplus: false, onevar: true */
 var JSLoader = JSLoader || (function () {
 
     var d = document,
@@ -15,44 +16,15 @@ var JSLoader = JSLoader || (function () {
         // detected User Agent (see _detectUA())
         ua = null; 
 
-    function load(urls, callback, args, scope) {
-        detectUA();
-        
-        registerUrls(urls);
-        registerCallback(callback, args ? args : [], scope);
-
-        dispatch();
-    }
-
-    function registerCallback(callback, params, scope) {
-        if (callback) {
-            queue.push(function () {
-                return function () { execute(callback, params, scope)};
-            }());
-        }
-    }
-
-    function registerUrls(urls) {
-        var i, mx;
-
-        if (urls) {
-            urls = urls.constructor === Array ? urls : [urls];
-            for (i = 0, mx = urls.length; i < mx; i++) {
-                queue.push(function () {
-                    var url = urls[i];
-                    return function () { loadScript(url); };
-                }());
-            }
-        }
-    }
-
     function dispatch(forceReadyState) {
         var process;
         state = forceReadyState ? STATUS.READY : state;
         if (state === STATUS.PENDING) { // previous request is processed
             return;
         }
-        if (process = queue.shift()) {
+
+        process = queue.shift();
+        if (process) {
             process();
         } else {
             state = STATUS.READY;
@@ -72,7 +44,7 @@ var JSLoader = JSLoader || (function () {
         if (ua.ie > 0) {
             script.onreadystatechange = function () {
                 var rs = script.readyState;
-                if (rs == "loaded" || rs == "complete") {
+                if (rs === "loaded" || rs === "complete") {
                     script.onreadystatechange = null;
                     dispatch(true); // activate dispatcher (clears state)
                 }
@@ -104,6 +76,33 @@ var JSLoader = JSLoader || (function () {
         dispatch(true); // resume dispatching
     }
 
+    function registerCallback(callback, params, scope) {
+        if (callback) {
+            queue.push(function () {
+                return function () {
+                    execute(callback, params, scope);
+                };
+            }());
+        }
+    }
+
+    function registerUrls(urls) {
+        var i, mx;
+
+        if (urls) {
+            urls = urls.constructor === Array ? urls : [urls];
+            for (i = 0, mx = urls.length; i < mx; i++) {
+                queue.push(function () {
+                    var url = urls[i];
+                    return function () {
+                        loadScript(url);
+                    };
+                }());
+            }
+        }
+    }
+
+
     /**
      * Obtains browser engine (user agent). Based on YUI agent detection routine.
      * Due to different routines being triggered by various browsers after script
@@ -133,7 +132,8 @@ var JSLoader = JSLoader || (function () {
             },
             nua = userAgent ? userAgent : (nav && nav.userAgent),
             loc = window.location,
-            href = loc && loc.href;
+            href = loc && loc.href,
+            m;
 
         // see whether we are behind ssl
         o.ssl = href && (href.toLowerCase().indexOf("https") === 0);
@@ -141,7 +141,7 @@ var JSLoader = JSLoader || (function () {
         if (nua) {
             // KHTML browsers should qualify as Safari X-Grade
             if ((/KHTML/).test(nua)) {
-                o.webkit=1;
+                o.webkit = 1;
             }
 
             // Modern WebKit browsers are at least X-Grade
@@ -169,7 +169,7 @@ var JSLoader = JSLoader || (function () {
                 // @todo check Opera/8.01 (J2ME/MIDP; Opera Mini/2.0.4509/1316; fi; U; ssr)
                 m = nua.match(/Opera[\s\/]([^\s]*)/);
                 if (m && m[1]) {
-                    o.opera =toNum(m[1]);
+                    o.opera = toNum(m[1]);
                     m = nua.match(/Opera Mini[^;]*/);
                     if (m) {
                         o.mobile = m[0]; // ex: Opera Mini/2.0.4509/1316
@@ -182,7 +182,7 @@ var JSLoader = JSLoader || (function () {
                         m = nua.match(/Gecko\/([^\s]*)/);
                         if (m) {
                             o.gecko = 1; // Gecko detected, look for revision
-                            m= nua.match(/rv:([^\s\)]*)/);
+                            m = nua.match(/rv:([^\s\)]*)/);
                             if (m && m[1]) {
                                 o.gecko = toNum(m[1]);
                             }
@@ -196,6 +196,15 @@ var JSLoader = JSLoader || (function () {
         ua = o;
 
         return ua;
+    }
+
+    function load(urls, callback, args, scope) {
+        detectUA();
+        
+        registerUrls(urls);
+        registerCallback(callback, args ? args : [], scope);
+
+        dispatch();
     }
 
     return {
@@ -214,5 +223,5 @@ var JSLoader = JSLoader || (function () {
          */
         getUA: detectUA
     };
-}) ();
+}());
 

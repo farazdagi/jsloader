@@ -1,0 +1,8 @@
+jslint.js - is a Crockford's JSLint utility, that perfects at hurting your feelings (and making you write better JS
+btw).
+
+Personally, I use Rhino (aliased as /usr/bin/js for brievity) so seeing whether script is good:
+
+    $ js jslint.js ../loader/loader.js
+
+is enough. It instructs Rhino to load jslint.js and feed it with loader.js class.
