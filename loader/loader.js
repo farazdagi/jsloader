@@ -125,8 +125,6 @@ var JSLoader = JSLoader || (function () {
                 opera: 0,
                 gecko: 0,
                 webkit: 0,
-                mobile: null,
-                air: 0,
                 caja: nav.cajaVersion,
                 ssl: false
             },
@@ -148,21 +146,6 @@ var JSLoader = JSLoader || (function () {
             m = nua.match(/AppleWebKit\/([^\s]*)/);
             if (m && m[1]) {
                 o.webkit = toNum(m[1]);
-
-                // Mobile browser check
-                if (/ Mobile\//.test(nua)) {
-                    o.mobile = "Apple"; // iPhone, iPad or iPod Touch
-                } else {
-                    m = nua.match(/NokiaN[^\/]*|Android \d\.\d|webOS\/\d\.\d/);
-                    if (m) {
-                        o.mobile = m[0]; // Nokia N-series, Android, webOS, ex: NokiaN95
-                    }
-                }
-
-                m = nua.match(/AdobeAIR\/([^\s]*)/);
-                if (m) {
-                    o.air = m[0]; // Adobe AIR 1.0 or better
-                }
             }
 
             if (!o.webkit) { // not webkit
@@ -170,10 +153,6 @@ var JSLoader = JSLoader || (function () {
                 m = nua.match(/Opera[\s\/]([^\s]*)/);
                 if (m && m[1]) {
                     o.opera = toNum(m[1]);
-                    m = nua.match(/Opera Mini[^;]*/);
-                    if (m) {
-                        o.mobile = m[0]; // ex: Opera Mini/2.0.4509/1316
-                    }
                 } else { // not opera or webkit
                     m = nua.match(/MSIE\s([^;]*)/);
                     if (m && m[1]) {
