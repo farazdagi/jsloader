@@ -1,6 +1,8 @@
 var JSLoader = JSLoader || (function () {
 
     var d = document,
+        // reference to <head>
+        head,
         
         // Processes queue - procs are executed sequentially (FIFO)
         queue = [],
@@ -14,16 +16,12 @@ var JSLoader = JSLoader || (function () {
         ua = null; 
 
     function load(urls, callback, args, scope) {
-        //_detectUA();
-        //_queueUris(uris, callback, args, scope);
-        //_process();
+        detectUA();
         
         registerUrls(urls);
-        registerCallback(callback, args, scope);
+        registerCallback(callback, args ? args : [], scope);
 
         dispatch();
-
-
     }
 
     function registerCallback(callback, params, scope) {
@@ -41,18 +39,19 @@ var JSLoader = JSLoader || (function () {
             urls = urls.constructor === Array ? urls : [urls];
             for (i = 0, mx = urls.length; i < mx; i++) {
                 queue.push(function () {
-                    return function () { loadScript(urls[i]); };
+                    var url = urls[i];
+                    return function () { loadScript(url); };
                 }());
             }
         }
     }
 
-    function dispatch() {
+    function dispatch(forceReadyState) {
         var process;
+        state = forceReadyState ? STATUS.READY : state;
         if (state === STATUS.PENDING) { // previous request is processed
             return;
         }
-
         if (process = queue.shift()) {
             process();
         } else {
@@ -63,32 +62,29 @@ var JSLoader = JSLoader || (function () {
     function loadScript(url) {
         var i, mx, script;
 
-        console.log(url);
-        state = STATUS.READY;
-        return ;
-
         state = STATUS.PENDING;
+        head = head || d.getElementsByTagName('head')[0];
 
         script = d.createElement('script');
         script.type = "text/javascript";
-        script.src = item.uri;
+        script.src = url;
 
         if (ua.ie > 0) {
             script.onreadystatechange = function () {
                 var rs = script.readyState;
                 if (rs == "loaded" || rs == "complete") {
                     script.onreadystatechange = null;
-                    _trigger(item.callback, item.args, item.scope);
+                    dispatch(true); // activate dispatcher (clears state)
                 }
             };
         } else {
             script.onload = function () {
-                _trigger(item.callback, item.args, item.scope);
+                dispatch(true); // activate dispatcher (clears state)
             };
         }
 
-
-
+        // actually inject script into <head>
+        head.appendChild(script);
     }
 
 
@@ -101,16 +97,11 @@ var JSLoader = JSLoader || (function () {
      */
     function execute(callback, args, scope) {
         if (callback) {
-            if ( !(args.constructor === Array) ) {
-                args = [args];
-            }
+            args = args.constructor === Array ? args : [args];
             callback.apply(scope || window, args);
-            state =  STATUS.READY;
         } 
 
-        if (queue.length) { // resume with the next item
-            _load();
-        }
+        dispatch(true); // resume dispatching
     }
 
     /**
@@ -121,7 +112,7 @@ var JSLoader = JSLoader || (function () {
      *
      * @link http://yui.yahooapis.com/combo?3.0.0/build/yui/yui.js
      */
-    function _detectUA(userAgent, forceReload) {
+    function detectUA(userAgent, forceReload) {
         // no need to obtain user agent yet again
         if (forceReload !== true && ua !== null) {
             return ua;
@@ -221,7 +212,7 @@ var JSLoader = JSLoader || (function () {
         /**
          * Obtain user agent browser
          */
-        getUA: _detectUA
+        getUA: detectUA
     };
 }) ();
 

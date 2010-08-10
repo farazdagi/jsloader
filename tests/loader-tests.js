@@ -6,22 +6,38 @@ $(document).ready(function () {
     };
 
     var callback1 = function(arg1, arg2) {
-        equals(arg1, 1, "Test first argument");
-        equals(arg2, 2, "Test second argument");
-        equals(this.the_ultimate_answer, 42, "Container object is accessible via this");
-    },
+            start();
+            callback11.apply(this, [arg1, arg2]);
+        },
+        callback11 = function(arg1, arg2) {
+            equals(arg1, 1, "Test first argument");
+            equals(arg2, 2, "Test second argument");
+            equals(this.the_ultimate_answer, 42, "Container object is accessible via this");
+        },
 
-    passMe = {x: 1, y: 2},
+        passMe = {x: 1, y: 2},
 
-    callback2 = function(theOnlyArg) {
-        same(theOnlyArg, passMe, "The only passed argument test for identity");
-        equals(theOnlyArg.x, 1, "Test object parameters");
-    },
+        callback2 = function(theOnlyArg) {
+            start();
+            callback21.apply(this, [theOnlyArg]);
+        },
+        callback21 = function(theOnlyArg) {
+            same(theOnlyArg, passMe, "The only passed argument test for identity");
+            equals(theOnlyArg.x, 1, "Test object parameters");
+        },
 
-    // object used as scope (to be passed into Function.call|apply)
-    scope = {
-        the_ultimate_answer: 42
-    };
+        callback3 = function () {
+            start();
+            callback31.apply(this, []);
+        },
+        callback31 = function () {
+            equals(1, 1, "Callback called");
+        },
+
+        // object used as scope (to be passed into Function.call|apply)
+        scope = {
+            the_ultimate_answer: 42
+        };
 
     module("Get Loader");
 
@@ -140,12 +156,54 @@ $(document).ready(function () {
     });
 
     test("JSLoader.load() - full argument list", 3, function () {
+        log("|-Full Argument List");
+        stop(); // will resume in callback
         // full arguments test
-        JSLoader.load('http://test.qubr.ru/jsloader/tests/js.php?id=1', callback1, [1, 2], scope);
+        JSLoader.load('http://test.qubr.ru/jsloader/tests/js.php?id=Full Argument List', callback1, [1, 2], scope);
     });
 
-    test("JSLoader.loader.load() - pass array of URIs", 3, function () {
+    test("JSLoader.load() - empty script list", 1, function () {
+        log("|-Empty Script List");
+        stop(); // will resume in callback
+        // full arguments test
+        JSLoader.load([], callback3);
+    });
 
+    test("JSLoader.load() - test concurrent requests", 9, function () {
+        log("|-Concurrent requests");
+        stop(); // will resume in callback
+
+        // we are piling the requests until previous are finished (there's artifical 0-5 secs delay
+        // on script load on qubr). This test whether JSLoader is capable of managing the queue
+
+        log("|--Single URL");
+        JSLoader.load('http://test.qubr.ru/jsloader/tests/js.php?id=Full Argument List', callback11, [1, 2], scope);
+
+        log("|--Empty list");
+        JSLoader.load([], callback31);
+
+
+        log("|--Multiple (3) URLs");
+        var uris = [
+            'http://test.qubr.ru/jsloader/tests/js.php?id=Mult 1',
+            'http://test.qubr.ru/jsloader/tests/js.php?id=Mult 2',
+            'http://test.qubr.ru/jsloader/tests/js.php?id=Mult 3'
+        ];
+        JSLoader.load(uris, callback11, [1, 2], scope);
+
+        log("|--Pass the the single object");
+        JSLoader.load(
+            'http://test.qubr.ru/jsloader/tests/js.php?id=Argument as object',
+            callback2, passMe
+        );
+    });
+
+
+
+    test("JSLoader.loader.load() - pass array of URIs", 3, function () {
+        log("|-Pass array of URIs");
+        stop(); // will resume in callback
+        
         var uris = [
             'http://test.qubr.ru/jsloader/tests/js.php?id=1',
             'http://test.qubr.ru/jsloader/tests/js.php?id=2',
@@ -157,6 +215,8 @@ $(document).ready(function () {
     });
 
     test("JSLoader.load() - single object passed", 2, function () {
+        log("|-Single Object Passed");
+        stop(); // will resume in callback
         JSLoader.load(
             'http://test.qubr.ru/jsloader/tests/js.php?id=1',
             callback2, passMe
